@@ -1,0 +1,1188 @@
+definitions:
+  handler.ConfigSetRequest:
+    properties:
+      appid:
+        type: integer
+      cache_size:
+        type: integer
+      enable_https:
+        type: boolean
+      max_download_load:
+        type: integer
+      max_parallel:
+        type: integer
+      max_upload_parallel:
+        type: integer
+      pan_ua:
+        type: string
+      pcs_ua:
+        type: string
+      user_agent:
+        type: string
+    type: object
+  model.CloudAddRequest:
+    properties:
+      save_path:
+        description: 保存路径
+        type: string
+      source_urls:
+        description: 下载源地址列表
+        items:
+          type: string
+        minItems: 1
+        type: array
+    required:
+    - save_path
+    - source_urls
+    type: object
+  model.CloudQueryRequest:
+    properties:
+      task_ids:
+        description: 任务ID列表
+        items:
+          type: integer
+        minItems: 1
+        type: array
+    required:
+    - task_ids
+    type: object
+  model.CloudTaskIDsRequest:
+    properties:
+      task_ids:
+        description: 任务ID列表
+        items:
+          type: integer
+        minItems: 1
+        type: array
+    required:
+    - task_ids
+    type: object
+  model.CopyRequest:
+    properties:
+      from_paths:
+        description: 源路径列表
+        items:
+          type: string
+        minItems: 1
+        type: array
+      to_path:
+        description: 目标路径
+        type: string
+    required:
+    - from_paths
+    - to_path
+    type: object
+  model.DeleteRequest:
+    properties:
+      paths:
+        description: 要删除的路径列表
+        items:
+          type: string
+        minItems: 1
+        type: array
+    required:
+    - paths
+    type: object
+  model.DownloadRequest:
+    properties:
+      paths:
+        description: 要下载的路径列表
+        items:
+          type: string
+        minItems: 1
+        type: array
+      save:
+        description: 是否保存到本地
+        type: boolean
+      save_to:
+        description: 保存路径
+        type: string
+    required:
+    - paths
+    type: object
+  model.ListRequest:
+    properties:
+      desc:
+        description: 是否降序
+        type: boolean
+      order:
+        description: 排序字段：name/time/size
+        type: string
+      path:
+        description: 路径
+        type: string
+    type: object
+  model.LoginRequest:
+    properties:
+      bduss:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+      vcode:
+        type: string
+      vcodestr:
+        type: string
+    type: object
+  model.MetaRequest:
+    properties:
+      paths:
+        description: 路径列表
+        items:
+          type: string
+        minItems: 1
+        type: array
+    required:
+    - paths
+    type: object
+  model.MkdirRequest:
+    properties:
+      path:
+        description: 目录路径
+        type: string
+    required:
+    - path
+    type: object
+  model.MoveRequest:
+    properties:
+      from_paths:
+        description: 源路径列表
+        items:
+          type: string
+        minItems: 1
+        type: array
+      to_path:
+        description: 目标路径
+        type: string
+    required:
+    - from_paths
+    - to_path
+    type: object
+  model.RecycleDeleteRequest:
+    properties:
+      fsids:
+        description: 要删除的文件ID列表
+        items:
+          type: integer
+        minItems: 1
+        type: array
+    required:
+    - fsids
+    type: object
+  model.RecycleRestoreRequest:
+    properties:
+      fsids:
+        description: 要恢复的文件ID列表
+        items:
+          type: integer
+        minItems: 1
+        type: array
+    required:
+    - fsids
+    type: object
+  model.Response:
+    properties:
+      code:
+        description: 状态码：0-成功，非0-失败
+        type: integer
+      data:
+        description: 响应数据
+      message:
+        description: 响应消息
+        type: string
+    type: object
+  model.ServerUploadRequest:
+    properties:
+      local_paths:
+        items:
+          type: string
+        type: array
+      policy:
+        type: string
+      target_dir:
+        type: string
+    required:
+    - local_paths
+    - target_dir
+    type: object
+  model.ShareCancelRequest:
+    properties:
+      share_ids:
+        description: 要取消的分享ID列表
+        items:
+          type: integer
+        minItems: 1
+        type: array
+    required:
+    - share_ids
+    type: object
+  model.ShareSetRequest:
+    properties:
+      password:
+        description: 提取码（可选）
+        type: string
+      paths:
+        description: 要分享的路径列表
+        items:
+          type: string
+        minItems: 1
+        type: array
+      period:
+        description: 有效期（天数，0表示永久）
+        type: integer
+    required:
+    - paths
+    type: object
+  model.TransferRequest:
+    properties:
+      collect:
+        description: 是否归档到同名目录
+        type: boolean
+      download:
+        description: 转存后是否自动下载
+        type: boolean
+      extract_code:
+        description: 提取码（可选）
+        type: string
+      share_url:
+        description: 分享链接
+        type: string
+    required:
+    - share_url
+    type: object
+  model.UserSwitchRequest:
+    properties:
+      uid:
+        type: integer
+    required:
+    - uid
+    type: object
+info:
+  contact: {}
+paths:
+  /api/account/list:
+    get:
+      consumes:
+      - application/json
+      description: 获取本服务中保存的所有登录用户列表
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 列出所有已登录账号
+      tags:
+      - 账号管理
+  /api/account/quota:
+    get:
+      consumes:
+      - application/json
+      description: 获取当前账号的空间配额和使用情况
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 获取网盘配额
+      tags:
+      - 账号管理
+  /api/account/switch:
+    post:
+      consumes:
+      - application/json
+      description: 切换当前活跃的百度网盘账号
+      parameters:
+      - description: 切换用户请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserSwitchRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 切换账号
+      tags:
+      - 账号管理
+  /api/account/who:
+    get:
+      consumes:
+      - application/json
+      description: 获取当前登录用户的详细信息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 获取当前账号信息
+      tags:
+      - 账号管理
+  /api/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: 使用 BDUSS 或 用户名/密码 登录百度网盘
+      parameters:
+      - description: 登录请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 登录账号
+      tags:
+      - 账号管理
+  /api/auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: 退出当前登录的百度网盘账号
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 退出当前账号
+      tags:
+      - 账号管理
+  /api/cd:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: 改变当前用户的工作目录
+      parameters:
+      - description: 目标路径
+        in: formData
+        name: path
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 切换工作目录
+      tags:
+      - 工作目录
+  /api/cloud/add:
+    post:
+      consumes:
+      - application/json
+      description: 添加新的离线下载任务
+      parameters:
+      - description: 添加任务请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.CloudAddRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 添加离线下载
+      tags:
+      - 离线下载
+  /api/cloud/cancel:
+    post:
+      consumes:
+      - application/json
+      description: 取消正在进行的离线下载任务
+      parameters:
+      - description: 取消任务请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.CloudTaskIDsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 取消离线任务
+      tags:
+      - 离线下载
+  /api/cloud/clear:
+    post:
+      consumes:
+      - application/json
+      description: 清空所有离线下载任务记录
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 清空离线任务
+      tags:
+      - 离线下载
+  /api/cloud/delete:
+    post:
+      consumes:
+      - application/json
+      description: 删除离线下载任务记录
+      parameters:
+      - description: 删除任务请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.CloudTaskIDsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 删除离线任务
+      tags:
+      - 离线下载
+  /api/cloud/list:
+    get:
+      consumes:
+      - application/json
+      description: 列出所有的离线下载任务
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 列出离线任务
+      tags:
+      - 离线下载
+  /api/cloud/query:
+    post:
+      consumes:
+      - application/json
+      description: 查询指定 ID 的离线任务状态
+      parameters:
+      - description: 查询任务请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.CloudQueryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 查询离线任务
+      tags:
+      - 离线下载
+  /api/config:
+    get:
+      consumes:
+      - application/json
+      description: 获取 API 服务的所有配置项
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 获取当前配置
+      tags:
+      - 配置管理
+  /api/config/set:
+    post:
+      consumes:
+      - application/json
+      description: 修改 API 服务的配置项
+      parameters:
+      - description: 配置设置请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.ConfigSetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 设置配置
+      tags:
+      - 配置管理
+  /api/cp:
+    post:
+      consumes:
+      - application/json
+      description: 复制文件或目录
+      parameters:
+      - description: 复制请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.CopyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 复制文件
+      tags:
+      - 文件管理
+  /api/download:
+    post:
+      consumes:
+      - application/json
+      description: 将网盘文件下载到服务器本地
+      parameters:
+      - description: 下载请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.DownloadRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 下载文件
+      tags:
+      - 上传下载
+  /api/health:
+    get:
+      consumes:
+      - application/json
+      description: 检查 API 服务是否存活
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 健康检查
+      tags:
+      - 系统
+  /api/locate:
+    post:
+      consumes:
+      - application/json
+      description: 获取指定文件的下载直链
+      parameters:
+      - description: 请求内容
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.DownloadRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 获取下载直链
+      tags:
+      - 上传下载
+  /api/ls:
+    post:
+      consumes:
+      - application/json
+      description: 列出指定路径下的文件和目录
+      parameters:
+      - description: 列表请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.ListRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 列出文件和目录
+      tags:
+      - 文件管理
+  /api/meta:
+    post:
+      consumes:
+      - application/json
+      description: 获取指定文件或目录的详细信息
+      parameters:
+      - description: 元数据请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.MetaRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 获取文件元数据
+      tags:
+      - 文件管理
+  /api/mkdir:
+    post:
+      consumes:
+      - application/json
+      description: 在网盘中创建新目录
+      parameters:
+      - description: 创建目录请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.MkdirRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 创建目录
+      tags:
+      - 文件管理
+  /api/mv:
+    post:
+      consumes:
+      - application/json
+      description: 移动文件或重命名文件
+      parameters:
+      - description: 移动/重命名请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.MoveRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 移动/重命名文件
+      tags:
+      - 文件管理
+  /api/pwd:
+    get:
+      consumes:
+      - application/json
+      description: 获取当前用户的工作目录路径
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 获取当前工作目录
+      tags:
+      - 工作目录
+  /api/recycle/clear:
+    post:
+      consumes:
+      - application/json
+      description: 清空回收站中所有文件
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 清空回收站
+      tags:
+      - 回收站
+  /api/recycle/delete:
+    post:
+      consumes:
+      - application/json
+      description: 彻底删除回收站中的文件（不可恢复）
+      parameters:
+      - description: 删除请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.RecycleDeleteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 彻底删除
+      tags:
+      - 回收站
+  /api/recycle/list:
+    get:
+      consumes:
+      - application/json
+      description: 列出回收站中的文件
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 列出回收站
+      tags:
+      - 回收站
+  /api/recycle/restore:
+    post:
+      consumes:
+      - application/json
+      description: 恢复回收站中的文件
+      parameters:
+      - description: 恢复请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.RecycleRestoreRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 恢复文件
+      tags:
+      - 回收站
+  /api/rm:
+    post:
+      consumes:
+      - application/json
+      description: 删除网盘中的文件或目录
+      parameters:
+      - description: 删除请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.DeleteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 删除文件
+      tags:
+      - 文件管理
+  /api/search:
+    get:
+      consumes:
+      - application/json
+      description: 在指定目录下搜索文件
+      parameters:
+      - description: 搜索关键字
+        in: query
+        name: keyword
+        required: true
+        type: string
+      - description: 搜索路径 (默认根目录)
+        in: query
+        name: path
+        type: string
+      - description: 是否递归
+        in: query
+        name: recurse
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 搜索文件
+      tags:
+      - 文件管理
+  /api/share/cancel:
+    post:
+      consumes:
+      - application/json
+      description: 取消指定的分享链接
+      parameters:
+      - description: 取消分享请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.ShareCancelRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 取消分享
+      tags:
+      - 分享管理
+  /api/share/list:
+    get:
+      consumes:
+      - application/json
+      description: 列出当前账户的所有分享
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 列出分享
+      tags:
+      - 分享管理
+  /api/share/set:
+    post:
+      consumes:
+      - application/json
+      description: 创建文件的分享链接
+      parameters:
+      - description: 创建分享请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.ShareSetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 创建分享
+      tags:
+      - 分享管理
+  /api/transfer:
+    post:
+      consumes:
+      - application/json
+      description: 将他人的分享链接转存到自己网盘
+      parameters:
+      - description: 转存请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.TransferRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 转存分享链接
+      tags:
+      - 转存管理
+  /api/upload:
+    post:
+      consumes:
+      - application/json
+      - multipart/form-data
+      description: 上传服务器本地文件到网盘 (application/json) 或 客户端上传文件 (multipart/form-data)
+      parameters:
+      - description: 服务器本地文件上传请求 (json)
+        in: body
+        name: request
+        schema:
+          $ref: '#/definitions/model.ServerUploadRequest'
+      - description: 文件内容 (form-data)
+        in: formData
+        name: file
+        type: file
+      - description: 目标目录 (form-data)
+        in: formData
+        name: target_dir
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 上传文件
+      tags:
+      - 上传下载
+swagger: "2.0"
