@@ -217,6 +217,132 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/auth/qrcode": {
+            "post": {
+                "description": "获取百度网盘扫码登录的二维码",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "账号管理"
+                ],
+                "summary": "获取登录二维码",
+                "parameters": [
+                    {
+                        "description": "请求参数",
+                        "name": "request",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/handler.QRCodeGetRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/qrcode/login": {
+            "post": {
+                "description": "使用临时 BDUSS 完成登录",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "账号管理"
+                ],
+                "summary": "完成扫码登录",
+                "parameters": [
+                    {
+                        "description": "登录请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.QRCodeLoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/qrcode/status": {
+            "get": {
+                "description": "查询二维码的扫码状态",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "账号管理"
+                ],
+                "summary": "查询扫码状态",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "二维码标识符",
+                        "name": "sign",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/cd": {
             "post": {
                 "description": "改变当前用户的工作目录",
@@ -1460,6 +1586,32 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user_agent": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.QRCodeGetRequest": {
+            "type": "object",
+            "properties": {
+                "include_ascii": {
+                    "description": "是否包含 ASCII 格式二维码",
+                    "type": "boolean"
+                }
+            }
+        },
+        "handler.QRCodeLoginRequest": {
+            "type": "object",
+            "required": [
+                "sign",
+                "temp_bduss"
+            ],
+            "properties": {
+                "sign": {
+                    "description": "二维码标识符",
+                    "type": "string"
+                },
+                "temp_bduss": {
+                    "description": "临时 BDUSS",
                     "type": "string"
                 }
             }

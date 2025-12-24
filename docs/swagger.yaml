@@ -20,6 +20,24 @@ definitions:
       user_agent:
         type: string
     type: object
+  handler.QRCodeGetRequest:
+    properties:
+      include_ascii:
+        description: 是否包含 ASCII 格式二维码
+        type: boolean
+    type: object
+  handler.QRCodeLoginRequest:
+    properties:
+      sign:
+        description: 二维码标识符
+        type: string
+      temp_bduss:
+        description: 临时 BDUSS
+        type: string
+    required:
+    - sign
+    - temp_bduss
+    type: object
   model.CloudAddRequest:
     properties:
       save_path:
@@ -391,6 +409,88 @@ paths:
           schema:
             $ref: '#/definitions/model.Response'
       summary: 退出当前账号
+      tags:
+      - 账号管理
+  /api/auth/qrcode:
+    post:
+      consumes:
+      - application/json
+      description: 获取百度网盘扫码登录的二维码
+      parameters:
+      - description: 请求参数
+        in: body
+        name: request
+        schema:
+          $ref: '#/definitions/handler.QRCodeGetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 获取登录二维码
+      tags:
+      - 账号管理
+  /api/auth/qrcode/login:
+    post:
+      consumes:
+      - application/json
+      description: 使用临时 BDUSS 完成登录
+      parameters:
+      - description: 登录请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.QRCodeLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 完成扫码登录
+      tags:
+      - 账号管理
+  /api/auth/qrcode/status:
+    get:
+      description: 查询二维码的扫码状态
+      parameters:
+      - description: 二维码标识符
+        in: query
+        name: sign
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 查询扫码状态
       tags:
       - 账号管理
   /api/cd:

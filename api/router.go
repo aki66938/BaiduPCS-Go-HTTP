@@ -86,6 +86,10 @@ func SetupRouter(username, password string, enableAuth bool) *gin.Engine {
 		{
 			auth.POST("/login", handler.Login)   // 登录
 			auth.POST("/logout", handler.Logout) // 登出
+			// 扫码登录
+			auth.POST("/qrcode", handler.QRCodeGet)          // 获取二维码
+			auth.GET("/qrcode/status", handler.QRCodeStatus) // 查询扫码状态
+			auth.POST("/qrcode/login", handler.QRCodeLogin)  // 完成扫码登录
 		}
 
 		account := api.Group("/account")

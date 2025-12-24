@@ -11,6 +11,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 	"unicode"
 
 	"github.com/olekukonko/tablewriter"
@@ -516,6 +517,34 @@ func main() {
 				cli.StringFlag{
 					Name:  "cookies",
 					Usage: "使用百度 Cookies 来登录百度账号",
+				},
+			},
+		},
+		{
+			Name:  "qrlogin",
+			Usage: "扫码登录百度账号",
+			Description: `
+	使用百度网盘APP扫描二维码登录账号，无需输入密码。
+	
+	示例:
+		BaiduPCS-Go qrlogin
+		BaiduPCS-Go qrlogin --timeout 300
+
+	说明:
+		程序会在终端显示一个二维码，使用百度网盘APP扫描后确认即可登录。
+		默认二维码有效期为5分钟(300秒)。`,
+			Category: "百度帐号",
+			Before:   reloadFn,
+			After:    saveFunc,
+			Action: func(c *cli.Context) error {
+				timeout := c.Int("timeout")
+				return pcscommand.RunQRLogin(time.Duration(timeout) * time.Second)
+			},
+			Flags: []cli.Flag{
+				cli.IntFlag{
+					Name:  "timeout",
+					Usage: "二维码超时时间（秒）",
+					Value: 300,
 				},
 			},
 		},

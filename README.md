@@ -111,11 +111,25 @@ go build -o BaiduPCS-Go
 
 ## 🔑 账号登录
 
-你可以通过以下两种方式登录百度账号：
+提供三种登录方式，满足不同使用场景：
 
-### 方式 1: 通过 API 登录 (推荐远程部署使用)
+### 方式 1: 扫码登录 (推荐 ⭐)
 
-调用 `/api/auth/login` 接口。
+最简单安全的登录方式，无需手动获取 BDUSS：
+
+```bash
+# 运行扫码登录命令
+./BaiduPCS-Go qrlogin
+
+# 可选：自定义超时时间（秒）
+./BaiduPCS-Go qrlogin --timeout 600
+```
+
+程序会在终端显示二维码，使用 **百度网盘 APP** 扫描即可完成登录。
+
+### 方式 2: 通过 API 登录 (推荐远程部署使用)
+
+调用 `/api/auth/login` 接口：
 
 ```bash
 curl -X POST http://localhost:5299/api/auth/login \
@@ -125,16 +139,36 @@ curl -X POST http://localhost:5299/api/auth/login \
   }'
 ```
 
+**扫码登录 API：**
+
+```bash
+# 1. 获取二维码
+curl -X POST http://localhost:5299/api/auth/qrcode \
+  -H "Content-Type: application/json" \
+  -d '{"include_ascii": true}'
+
+# 2. 查询扫码状态
+curl "http://localhost:5299/api/auth/qrcode/status?sign=xxx"
+
+# 3. 完成登录
+curl -X POST http://localhost:5299/api/auth/qrcode/login \
+  -H "Content-Type: application/json" \
+  -d '{"sign": "xxx", "temp_bduss": "yyy"}'
+```
+
 > **如何获取 BDUSS?**
 > 在浏览器登录百度网盘，打开开发者工具 (F12) -> Application -> Cookies，找到 `BDUSS` 的值。
 
-### 方式 2: 命令行登录 (推荐本地使用)
+### 方式 3: BDUSS/Cookies 登录
 
-如果你的服务运行在本地或你有终端访问权限：
+如果你已有 BDUSS 或完整 Cookies：
 
 ```bash
-./BaiduPCS-Go login
-# 按照提示输入验证码或 BDUSS
+# 使用 BDUSS + STOKEN
+./BaiduPCS-Go login -bduss=xxx -stoken=yyy
+
+# 使用 Cookies
+./BaiduPCS-Go login -cookies="BDUSS=xxx; STOKEN=yyy; ..."
 ```
 
 ---
