@@ -148,8 +148,16 @@ func (c *QRLoginClient) GetQRCode() (*QRCodeInfo, error) {
 		imgURL = "https://" + imgURL
 	}
 
-	// 生成ASCII二维码
-	asciiQR := generateASCIIQRCode(imgURL)
+	// 解码图片获取真实二维码内容，用于生成可扫描的ASCII二维码
+	var asciiQR string
+	qrContent, err := decodeQRCodeFromURL(imgURL)
+	if err == nil && qrContent != "" {
+		// 使用真实内容生成ASCII二维码
+		asciiQR = generateASCIIQRCode(qrContent)
+	} else {
+		// 解码失败时，使用URL生成（备用方案，扫描后会跳转）
+		asciiQR = generateASCIIQRCode(imgURL)
+	}
 
 	return &QRCodeInfo{
 		Sign:     qrResp.Sign,
