@@ -1219,11 +1219,17 @@ paths:
       - 分享管理
   /api/stream-download:
     get:
-      description: 代理下载网盘文件，解决浏览器防盗链问题。后端使用正确的 User-Agent 请求百度服务器，然后流式转发给浏览器。
+      description: 代理下载网盘文件，解决浏览器防盗链问题。后端使用正确的 User-Agent 请求百度服务器，然后流式转发给浏览器。需要传入百度网盘的
+        Cookie（至少包含 BDUSS）。
       parameters:
       - description: 网盘文件路径，如 /视频/电影.mp4
         in: query
         name: path
+        required: true
+        type: string
+      - description: 百度网盘 Cookie（至少包含 BDUSS）
+        in: query
+        name: cookie
         required: true
         type: string
       produces:

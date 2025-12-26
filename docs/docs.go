@@ -1454,7 +1454,7 @@ const docTemplate = `{
         },
         "/api/stream-download": {
             "get": {
-                "description": "代理下载网盘文件，解决浏览器防盗链问题。后端使用正确的 User-Agent 请求百度服务器，然后流式转发给浏览器。",
+                "description": "代理下载网盘文件，解决浏览器防盗链问题。后端使用正确的 User-Agent 请求百度服务器，然后流式转发给浏览器。需要传入百度网盘的 Cookie（至少包含 BDUSS）。",
                 "produces": [
                     "application/octet-stream"
                 ],
@@ -1467,6 +1467,13 @@ const docTemplate = `{
                         "type": "string",
                         "description": "网盘文件路径，如 /视频/电影.mp4",
                         "name": "path",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "百度网盘 Cookie（至少包含 BDUSS）",
+                        "name": "cookie",
                         "in": "query",
                         "required": true
                     }
