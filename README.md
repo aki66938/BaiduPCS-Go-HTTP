@@ -178,6 +178,29 @@ curl -X POST http://localhost:5299/api/auth/qrcode/login \
 *   **数据安全**: 本项目是一个开源的客户端工具，**不会**上传你的任何账号信息到第三方服务器。所有交互仅发生在你的服务器和百度网盘官方服务器之间。
 *   **配置文件**: 登录凭据 (BDUSS/Cookies) 存储在用户目录下的配置文件中 (如 `~/.config/BaiduPCS-Go/pcs_config.json`)，**不包含**在项目源码中，因此推送到 Git 仓库是安全的。
 
+## 📝 版本历史
+
+### v1.3.0
+*   **API 增强**: `/api/account/who` 接口现在会返回完整的 `cookies` 字段。这对于扫码登录用户特别有用，因为扫码登录通常不保存原始 Cookie 字符串，该功能会自动根据 BDUSS 和 STOKEN 构造可用 Cookie。
+*   **流式下载优化**: 修复了 `/api/stream-download` 接口的 403 问题，现在支持通过 `cookie` 参数正确进行流式转发。
+
+### v1.2.x
+*   实现基础 HTTP API 功能。
+*   集成 Swagger 文档。
+*   支持流式下载代理。
+
+## 📝 版本历史
+
+### v1.3.0
+*   **API 增强**: `/api/account/who` 接口现在会返回完整的 `cookies` 字段。这对于扫码登录用户特别有用，因为扫码登录通常不保存原始 Cookie 字符串，该功能会自动根据 BDUSS 和 STOKEN 构造可用 Cookie。
+*   **流式下载优化**: 修复了 `/api/stream-download` 接口的 403 问题，现在支持通过 `cookie` 参数正确进行流式转发。
+*   **问题排查**: 确认了部分 BDUSS 在下载大文件时需要配合 STOKEN 使用，否则会触发 403 错误。v1.3.0 通过暴露完整 Cookie 解决了此前传问题。
+
+### v1.2.x
+*   实现基础 HTTP API 功能。
+*   集成 Swagger 文档。
+*   支持流式下载代理。
+
 ## 📜 历史文档
 
 原版 BaiduPCS-Go 的说明文档已归档至 [docs/README_legacy.md](docs/README_legacy.md)。
