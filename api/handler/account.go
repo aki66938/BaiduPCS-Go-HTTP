@@ -26,6 +26,17 @@ func Who(c *gin.Context) {
 		return
 	}
 
+	// 构造或获取 cookies
+	cookies := activeUser.COOKIES
+	if cookies == "" {
+		// 如果是通过扫码登录等方式，可能没有完整的 cookies 字符串
+		// 手动拼接至少包含 BDUSS 和 STOKEN
+		cookies = "BDUSS=" + activeUser.BDUSS
+		if activeUser.STOKEN != "" {
+			cookies += "; STOKEN=" + activeUser.STOKEN
+		}
+	}
+
 	c.JSON(http.StatusOK, model.SuccessResponse(gin.H{
 		"uid":     activeUser.UID,
 		"name":    activeUser.Name,
@@ -33,6 +44,7 @@ func Who(c *gin.Context) {
 		"age":     activeUser.Age,
 		"bduss":   activeUser.BDUSS,
 		"workdir": activeUser.Workdir,
+		"cookies": cookies, // 新增：返回完整的 cookies 字符串供前端使用
 	}))
 }
 
