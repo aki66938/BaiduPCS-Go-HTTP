@@ -1,9 +1,10 @@
 package panhome
 
 import (
+	"net/url"
+
 	"github.com/qjfoidnh/BaiduPCS-Go/baidupcs/expires"
 	"github.com/qjfoidnh/BaiduPCS-Go/requester"
-	"net/url"
 )
 
 const (
@@ -17,7 +18,7 @@ var (
 		Host:   "pan.baidu.com",
 	}
 	// PanHomeUserAgent PanHome User-Agent
-	PanHomeUserAgent = "Mozilla/5.0"
+	PanHomeUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
 )
 
 type (

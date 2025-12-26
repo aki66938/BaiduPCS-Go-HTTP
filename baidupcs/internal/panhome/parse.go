@@ -4,7 +4,6 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"regexp"
 	"unsafe"
 )
@@ -17,9 +16,9 @@ var (
 )
 
 func (ph *PanHome) getSignInfo() error {
-	ph.client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
-		return http.ErrUseLastResponse
-	}
+	// ph.client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+	// 	return http.ErrUseLastResponse
+	// }
 	u := *panBaiduComURL
 	u.Path = "/disk/home"
 	resp, err := ph.client.Req(http.MethodGet, u.String(), nil, map[string]string{
@@ -32,22 +31,8 @@ func (ph *PanHome) getSignInfo() error {
 		return err
 	}
 
-	loc := resp.Header.Get("Location")
-	switch loc {
-	case "/":
-		return ErrCookieInvalid
-	case "":
-		//pass
-	default:
-		locU, err := url.Parse(loc)
-		if err != nil {
-			return ErrUnknownLocation
-		}
-		if locU.Host == "passport.baidu.com" {
-			return ErrCookieInvalid
-		}
-		return ErrUnknownLocation
-	}
+	// loc := resp.Header.Get("Location")
+	// ... logic removed to allow redirect follow ...
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {

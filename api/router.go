@@ -108,6 +108,13 @@ func SetupRouter(username, password string, enableAuth bool) *gin.Engine {
 			config.POST("/set", handler.ConfigSet) // 设置配置
 		}
 
+		// xpan API 接口（基于 AccessToken）
+		xpan := api.Group("/xpan")
+		{
+			xpan.GET("/files", handler.XpanListFiles)        // 获取文件列表
+			xpan.GET("/file/meta", handler.XpanFileMetadata) // 获取文件元数据
+		}
+
 		// 健康检查
 		api.GET("/health", handler.Health)
 	}

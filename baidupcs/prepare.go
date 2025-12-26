@@ -482,24 +482,45 @@ func (pcs *BaiduPCS) PrepareLocatePanAPIDownload(fidList ...int64) (dataReadClos
 	pcs.lazyInit()
 	// 初始化
 	var (
-		sign, err = pcs.ph.CacheSignature()
+		sign, _ = pcs.ph.CacheSignature()
 	)
-	if err != nil {
-		return nil, &pcserror.PanErrorInfo{
-			Operation: OperationLocatePanAPIDownload,
-			ErrType:   pcserror.ErrTypeOthers,
-			Err:       err,
-		}
+	// if err != nil {
+	// 	return nil, &pcserror.PanErrorInfo{
+	// 		Operation: OperationLocatePanAPIDownload,
+	// 		ErrType:   pcserror.ErrTypeOthers,
+	// 		Err:       err,
+	// 	}
+	// }
+
+	// Fallback if sign is nil
+	signVal := ""
+	timeVal := ""
+	if sign != nil {
+		signVal = sign.Sign()
+		timeVal = sign.Timestamp()
 	}
 
 	panURL := pcs.generatePanURL("download", nil)
 	baiduPCSVerbose.Infof("%s URL: %s\n", OperationLocatePanAPIDownload, panURL)
 
-	dataReadCloser, panError = pcs.sendReqReturnReadCloser(reqTypePan, OperationLocatePanAPIDownload, http.MethodPost, panURL.String(), map[string]string{
-		"sign":      sign.Sign(),
-		"timestamp": sign.Timestamp(),
-		"fidlist":   mergeInt64List(fidList...),
-	}, map[string]string{
+	// try to get bdstoken
+	bdstoken, _ := pcs.BDSToken()
+
+	params := map[string]string{
+		"fidlist": mergeInt64List(fidList...),
+	}
+	if signVal != "" {
+		params["sign"] = signVal
+		params["timestamp"] = timeVal
+		// params["bdstoken"] = bdstoken // send both if we have sign?
+	} else {
+		// If no sign, try sending bdstoken only
+		if bdstoken != "" {
+			params["bdstoken"] = bdstoken
+		}
+	}
+
+	dataReadCloser, panError = pcs.sendReqReturnReadCloser(reqTypePan, OperationLocatePanAPIDownload, http.MethodPost, panURL.String(), params, map[string]string{
 		"Content-Type": "application/x-www-form-urlencoded",
 	})
 	return
