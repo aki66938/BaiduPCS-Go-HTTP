@@ -64,8 +64,8 @@ func StreamDownload(c *gin.Context) {
 		return
 	}
 
-	// 2. 使用正确的 User-Agent 请求百度服务器
-	client := &http.Client{}
+	// 2. 使用 PCS 客户端发起请求（携带 BDUSS 等认证 Cookies）
+	pcsClient := pcs.GetClient()
 	proxyReq, reqErr := http.NewRequest("GET", downloadURL.String(), nil)
 	if reqErr != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse(500, fmt.Sprintf("创建请求失败: %v", reqErr)))
@@ -80,8 +80,8 @@ func StreamDownload(c *gin.Context) {
 		proxyReq.Header.Set("Range", rangeHeader)
 	}
 
-	// 3. 发起请求
-	resp, respErr := client.Do(proxyReq)
+	// 3. 发起请求（使用 PCS 客户端，自动携带 Cookies）
+	resp, respErr := pcsClient.Client.Do(proxyReq)
 	if respErr != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse(500, fmt.Sprintf("请求百度服务器失败: %v", respErr)))
 		return
