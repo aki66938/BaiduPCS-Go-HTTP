@@ -1452,6 +1452,47 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/stream-download": {
+            "get": {
+                "description": "代理下载网盘文件，解决浏览器防盗链问题。后端使用正确的 User-Agent 请求百度服务器，然后流式转发给浏览器。",
+                "produces": [
+                    "application/octet-stream"
+                ],
+                "tags": [
+                    "上传下载"
+                ],
+                "summary": "流式下载文件",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "网盘文件路径，如 /视频/电影.mp4",
+                        "name": "path",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "文件流",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/transfer": {
             "post": {
                 "description": "将他人的分享链接转存到自己网盘",

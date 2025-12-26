@@ -47,9 +47,10 @@ func SetupRouter(username, password string, enableAuth bool) *gin.Engine {
 		api.POST("/cd", handler.Cd)  // 切换目录
 
 		// 上传下载接口
-		api.POST("/upload", handler.Upload)     // 上传文件
-		api.POST("/download", handler.Download) // 下载文件
-		api.POST("/locate", handler.Locate)     // 获取直链
+		api.POST("/upload", handler.Upload)                 // 上传文件
+		api.POST("/download", handler.Download)             // 下载文件
+		api.POST("/locate", handler.Locate)                 // 获取直链
+		api.GET("/stream-download", handler.StreamDownload) // 流式代理下载
 
 		recycle := api.Group("/recycle")
 		{

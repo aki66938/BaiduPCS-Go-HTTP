@@ -1217,6 +1217,33 @@ paths:
       summary: 创建分享
       tags:
       - 分享管理
+  /api/stream-download:
+    get:
+      description: 代理下载网盘文件，解决浏览器防盗链问题。后端使用正确的 User-Agent 请求百度服务器，然后流式转发给浏览器。
+      parameters:
+      - description: 网盘文件路径，如 /视频/电影.mp4
+        in: query
+        name: path
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: 文件流
+          schema:
+            type: file
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 流式下载文件
+      tags:
+      - 上传下载
   /api/transfer:
     post:
       consumes:
