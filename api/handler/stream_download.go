@@ -4,18 +4,47 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/cookiejar"
 	"net/url"
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 	"github.com/qjfoidnh/BaiduPCS-Go/api/model"
 	"github.com/qjfoidnh/BaiduPCS-Go/internal/pcscommand"
+	"github.com/qjfoidnh/BaiduPCS-Go/internal/pcsconfig"
+	"golang.org/x/net/publicsuffix"
 )
 
 const (
 	// BaiduPanUserAgent 百度网盘客户端 User-Agent，用于绕过防盗链
 	BaiduPanUserAgent = "netdisk;2.2.51.6;netdisk;10.0.63;PC;android-android"
 )
+
+// cloneJarWithDomain 将 Cookies 从源 Jar 复制到新域名的 Jar
+func cloneJarWithDomain(srcJar http.CookieJar, newURL string) (http.CookieJar, error) {
+	if srcJar == nil {
+		return nil, fmt.Errorf("srcJar is nil")
+	}
+	dstJar, err := cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
+	if err != nil {
+		return nil, err
+	}
+
+	u, _ := url.Parse(newURL)
+	newDomain := u.Hostname()
+
+	// 从 pan.baidu.com 获取 cookies
+	srcURL, _ := url.Parse("https://pan.baidu.com/")
+	cookies := srcJar.Cookies(srcURL)
+
+	for _, c := range cookies {
+		nc := *c
+		nc.Domain = newDomain
+		dstURL, _ := url.Parse("https://" + newDomain + "/")
+		dstJar.SetCookies(dstURL, []*http.Cookie{&nc})
+	}
+	return dstJar, nil
+}
 
 // StreamDownload 流式代理下载
 // @Summary 流式下载文件
@@ -64,9 +93,23 @@ func StreamDownload(c *gin.Context) {
 		return
 	}
 
-	// 2. 使用 PCS 客户端发起请求（携带 BDUSS 等认证 Cookies）
-	pcsClient := pcs.GetClient()
-	proxyReq, reqErr := http.NewRequest("GET", downloadURL.String(), nil)
+	dlink := downloadURL.String()
+
+	// 2. 创建 HTTP 客户端，使用 panHTTPClient 配置
+	client := pcsconfig.Config.PanHTTPClient()
+
+	// 关键：复制 Cookies 到下载 URL 的域名
+	activePCS := pcsconfig.Config.ActiveUserBaiduPCS()
+	cookieJar := activePCS.GetClient().Jar
+	newCookieJar, jarErr := cloneJarWithDomain(cookieJar, dlink)
+	if jarErr != nil {
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse(500, fmt.Sprintf("Cookie处理失败: %v", jarErr)))
+		return
+	}
+	client.SetCookiejar(newCookieJar)
+
+	// 3. 创建请求
+	proxyReq, reqErr := http.NewRequest("GET", dlink, nil)
 	if reqErr != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse(500, fmt.Sprintf("创建请求失败: %v", reqErr)))
 		return
@@ -80,8 +123,8 @@ func StreamDownload(c *gin.Context) {
 		proxyReq.Header.Set("Range", rangeHeader)
 	}
 
-	// 3. 发起请求（使用 PCS 客户端，自动携带 Cookies）
-	resp, respErr := pcsClient.Client.Do(proxyReq)
+	// 4. 发起请求
+	resp, respErr := client.Client.Do(proxyReq)
 	if respErr != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse(500, fmt.Sprintf("请求百度服务器失败: %v", respErr)))
 		return
@@ -94,7 +137,7 @@ func StreamDownload(c *gin.Context) {
 		return
 	}
 
-	// 4. 设置响应头
+	// 5. 设置响应头
 	filename := filepath.Base(path)
 	// URL 编码文件名以支持中文 (RFC 5987)
 	encodedFilename := url.PathEscape(filename)
@@ -111,7 +154,7 @@ func StreamDownload(c *gin.Context) {
 		c.Header("Content-Range", contentRange)
 	}
 
-	// 5. 流式转发
+	// 6. 流式转发
 	c.Status(resp.StatusCode)
 
 	// 使用缓冲区流式传输，避免内存问题
