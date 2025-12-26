@@ -247,12 +247,13 @@ func (c *QRLoginClient) CheckQRStatus(sign string) (*QRLoginResult, error) {
 }
 
 // ExchangeBDUSS 使用临时BDUSS交换正式凭证
-func (c *QRLoginClient) ExchangeBDUSS(tempBDUSS string) (bduss, stoken string, err error) {
+// ExchangeBDUSS 使用临时BDUSS交换正式凭证
+func (c *QRLoginClient) ExchangeBDUSS(tempBDUSS string) (bduss, stoken, cookies string, err error) {
 	url := fmt.Sprintf(QRCodeLoginURL, tempBDUSS)
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		return "", "", fmt.Errorf("创建请求失败: %v", err)
+		return "", "", "", fmt.Errorf("创建请求失败: %v", err)
 	}
 	req.Header.Set("User-Agent", c.userAgent)
 
@@ -266,13 +267,22 @@ func (c *QRLoginClient) ExchangeBDUSS(tempBDUSS string) (bduss, stoken string, e
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return "", "", fmt.Errorf("请求登录失败: %v", err)
+		return "", "", "", fmt.Errorf("请求登录失败: %v", err)
 	}
 	defer resp.Body.Close()
 
-	// 从Set-Cookie中提取BDUSS和STOKEN
-	cookies := resp.Header.Values("Set-Cookie")
-	for _, cookie := range cookies {
+	// 从Set-Cookie中提取所有 Cookie，并拼接成完整字符串
+	cookieSlice := resp.Header.Values("Set-Cookie")
+	var cookieParts []string
+	for _, cookie := range cookieSlice {
+		// 简单的清理，去掉 HttpOnly 等属性，只保留 key=value
+		// 实际上简单的做法是保留分号前的部分，或者直接拼接完整的（包含属性也无所谓，客户端发请求时通常会被忽略或处理）
+		// 为了稳健，我们只提取 key=value;
+		parts := strings.Split(cookie, ";")
+		if len(parts) > 0 {
+			cookieParts = append(cookieParts, parts[0])
+		}
+
 		if strings.Contains(cookie, "BDUSS=") {
 			re := regexp.MustCompile(`BDUSS=([^;]+)`)
 			matches := re.FindStringSubmatch(cookie)
@@ -288,12 +298,13 @@ func (c *QRLoginClient) ExchangeBDUSS(tempBDUSS string) (bduss, stoken string, e
 			}
 		}
 	}
+	cookies = strings.Join(cookieParts, "; ")
 
 	if bduss == "" {
-		return "", "", fmt.Errorf("未能从响应中获取BDUSS")
+		return "", "", "", fmt.Errorf("未能从响应中获取BDUSS")
 	}
 
-	return bduss, stoken, nil
+	return bduss, stoken, cookies, nil
 }
 
 // generateASCIIQRCode 生成ASCII格式二维码
@@ -412,13 +423,13 @@ func RunQRLogin(timeout time.Duration) error {
 			// 已确认登录
 			if result.Status == QRStatusConfirmed && result.TempBDUSS != "" {
 				// 4. 交换正式凭证
-				bduss, stoken, err := client.ExchangeBDUSS(result.TempBDUSS)
+				bduss, stoken, cookies, err := client.ExchangeBDUSS(result.TempBDUSS)
 				if err != nil {
 					return fmt.Errorf("交换凭证失败: %v", err)
 				}
 
 				// 5. 保存用户配置
-				baidu, err := pcsconfig.Config.SetupUserByBDUSS(bduss, "", stoken, "")
+				baidu, err := pcsconfig.Config.SetupUserByBDUSS(bduss, "", stoken, cookies)
 				if err != nil {
 					return fmt.Errorf("保存用户配置失败: %v", err)
 				}

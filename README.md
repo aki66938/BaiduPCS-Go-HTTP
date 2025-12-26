@@ -191,10 +191,12 @@ curl -X POST http://localhost:5299/api/auth/qrcode/login \
 
 ## 📝 版本历史
 
+### v1.3.1
+*   **Cookie 捕获增强**: 彻底重写了扫码登录的 Cookie 提取逻辑。不仅仅是 BDUSS 和 STOKEN，现在会捕获所有 `Set-Cookie` (包括 `BAIDUID`)，彻底解决因缺少关键 Cookie 导致的大文件下载 403 问题。
+
 ### v1.3.0
-*   **API 增强**: `/api/account/who` 接口现在会返回完整的 `cookies` 字段。这对于扫码登录用户特别有用，因为扫码登录通常不保存原始 Cookie 字符串，该功能会自动根据 BDUSS 和 STOKEN 构造可用 Cookie。
-*   **流式下载优化**: 修复了 `/api/stream-download` 接口的 403 问题，现在支持通过 `cookie` 参数正确进行流式转发。
-*   **问题排查**: 确认了部分 BDUSS 在下载大文件时需要配合 STOKEN 使用，否则会触发 403 错误。v1.3.0 通过暴露完整 Cookie 解决了此前传问题。
+*   **API 增强**: `/api/account/who` 接口现在会返回完整的 `cookies` 字段。
+*   **流式下载优化**: 修复了 `/api/stream-download` 接口的 403 问题。
 
 ### v1.2.x
 *   实现基础 HTTP API 功能。

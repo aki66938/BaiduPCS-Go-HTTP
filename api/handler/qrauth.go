@@ -178,14 +178,14 @@ func QRCodeLogin(c *gin.Context) {
 	}
 
 	// 交换正式凭证
-	bduss, stoken, err := client.ExchangeBDUSS(req.TempBDUSS)
+	bduss, stoken, cookies, err := client.ExchangeBDUSS(req.TempBDUSS)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse(500, "交换凭证失败: "+err.Error()))
 		return
 	}
 
 	// 保存用户配置
-	baidu, err := pcsconfig.Config.SetupUserByBDUSS(bduss, "", stoken, "")
+	baidu, err := pcsconfig.Config.SetupUserByBDUSS(bduss, "", stoken, cookies)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse(500, "保存用户配置失败: "+err.Error()))
 		return
@@ -201,6 +201,9 @@ func QRCodeLogin(c *gin.Context) {
 		"message": "登录成功",
 		"uid":     baidu.UID,
 		"name":    baidu.Name,
+		"bduss":   bduss,
+		"stoken":  stoken,
+		"cookies": cookies,
 	}))
 }
 
